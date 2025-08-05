@@ -1,26 +1,60 @@
-<?php
-$merchant_id = "MID-35874-695";
-$secret = "fe36b086-250e-4728-adad-1b530bdfb00a";  // apikey
-$amount = 100;
-$order_id = uniqid("order_");
-$currency = "EGP";
-$mode = "test";
-$redirect_url = "yourapp://payment-success";
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>بوابة الدفع - كاشير</title>
+</head>
+<body>
+  <h2>جارٍ تحويلك إلى بوابة الدفع...</h2>
 
-$data = array(
-    "merchantId" => $merchant_id,
-    "amount" => $amount,
-    "orderId" => $order_id,
-    "currency" => $currency,
-    "mode" => $mode,
-    "redirectUrl" => $redirect_url
-);
+  <script>
+    const merchantId = "MID-35874-695";
+    const secret = "fe36b086-250e-4728-adad-1b530bdfb00a"; // مفتاح الاختبار فقط
+    const amount = 100;
+    const orderId = "order_" + Math.floor(Math.random() * 100000);
+    const currency = "EGP";
+    const mode = "test";
+    const redirectUrl = "yourapp://payment-success";
 
-// توليد الـ signature
-$signature = hash_hmac('sha256', json_encode($data), $secret);
+    const data = {
+      merchantId,
+      amount,
+      orderId,
+      currency,
+      mode,
+      redirectUrl
+    };
 
-// بناء رابط الدفع
-$url = "https://checkout.kashier.io/?merchantId={$merchant_id}&amount={$amount}&orderId={$order_id}&currency={$currency}&mode={$mode}&redirectUrl=" . urlencode($redirect_url) . "&signature={$signature}";
+    const message = JSON.stringify(data);
 
-echo $url;
-?>
+    async function generateSignature() {
+      const encoder = new TextEncoder();
+
+      const key = await crypto.subtle.importKey(
+        "raw",
+        encoder.encode(secret),
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["sign"]
+      );
+
+      const signatureBuffer = await crypto.subtle.sign(
+        "HMAC",
+        key,
+        encoder.encode(message)
+      );
+
+      const signature = Array.from(new Uint8Array(signatureBuffer))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+
+      const paymentUrl = `https://checkout.kashier.io/?merchantId=${merchantId}&amount=${amount}&orderId=${orderId}&currency=${currency}&mode=${mode}&redirectUrl=${encodeURIComponent(redirectUrl)}&signature=${signature}`;
+
+      // تحويل المستخدم لبوابة الدفع
+      window.location.href = paymentUrl;
+    }
+
+    generateSignature();
+  </script>
+</body>
+</html>
