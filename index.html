@@ -48,7 +48,7 @@
           .map((b) => b.toString(16).padStart(2, "0"))
           .join("");
 
-        const url = `https://pay.kashier.io/?merchantId=${merchantId}&amount=${amount}&orderId=${orderId}&currency=${currency}&mode=${mode}&redirectUrl=${redirectUrl}&signature=${signature}`;
+        const url = `https://checkout.kashier.io/?merchantId=${merchantId}&amount=${amount}&orderId=${orderId}&currency=${currency}&mode=${mode}&redirectUrl=${redirectUrl}&signature=${signature}`;
 
         // تحويل المستخدم لبوابة الدفع
         window.location.href = url;
