@@ -1,60 +1,67 @@
-<!DOCTYPE html>
-<html lang="ar">
+
+
+<?php
+
+include  'backend.php';
+
+?>
+
+<html>
+
 <head>
-  <meta charset="UTF-8" />
-  <title>بوابة الدفع - كاشير</title>
-</head>
+<script>
+  function responseCallBack(e){ 
+  if(e.data.message== "success"){
+      console.log("Success payment", e.data )
+  }else if(e.data.message == "failure"){
+      console.log("Failure payment", e.data )
+  }else{
+      console.log("Other Actions", e.data )
+  }
+}
+     if (window.addEventListener) {
+       console.log("if");
+       addEventListener("message", responseCallBack, false)
+   } else {
+    console.log("else");     
+       attachEvent("onmessage", responseCallBack)
+   }
+</script>
+</head>​
+
 <body>
-  <h2>جارٍ تحويلك إلى بوابة الدفع...</h2>
 
-  <script>
-    const merchantId = "MID-35874-695";
-    const secret = "fe36b086-250e-4728-adad-1b530bdfb00a"; // مفتاح الاختبار فقط
-    const amount = 100;
-    const orderId = "order_" + Math.floor(Math.random() * 100000);
-    const currency = "EGP";
-    const mode = "test";
-    const redirectUrl = "yourapp://payment-success";
+<a target="_blank" href="<?php echo $hppUrl ?>"> Click to check Hosted Payment Page Form </a>
 
-    const data = {
-      merchantId,
-      amount,
-      orderId,
-      currency,
-      mode,
-      redirectUrl
-    };
+<script id="kashier-iFrame"
 
-    const message = JSON.stringify(data);
+src="<?php echo $order->baseUrl ?>/kashier-checkout.js"
 
-    async function generateSignature() {
-      const encoder = new TextEncoder();
+data-amount="<?php echo $order->amount ?>"
 
-      const key = await crypto.subtle.importKey(
-        "raw",
-        encoder.encode(secret),
-        { name: "HMAC", hash: "SHA-256" },
-        false,
-        ["sign"]
-      );
+data-description="some description"
 
-      const signatureBuffer = await crypto.subtle.sign(
-        "HMAC",
-        key,
-        encoder.encode(message)
-      );
+data-hash="<?php echo $hash ?>"
 
-      const signature = Array.from(new Uint8Array(signatureBuffer))
-        .map(b => b.toString(16).padStart(2, "0"))
-        .join("");
+data-currency="<?php echo $order->currency ?>"
 
-      const paymentUrl = `https://checkout.kashier.io/?merchantId=${merchantId}&amount=${amount}&orderId=${orderId}&currency=${currency}&mode=${mode}&redirectUrl=${encodeURIComponent(redirectUrl)}&signature=${signature}`;
+data-orderId="<?php echo $order->merchantOrderId ?>"
 
-      // تحويل المستخدم لبوابة الدفع
-      window.location.href = paymentUrl;
-    }
+data-merchantId="<?php echo $order->mid ?>"
 
-    generateSignature();
-  </script>
+data-allowedMethods="<?php echo $order->allowedMethods ?>"
+
+data-merchantRedirect="http://localhost/Php-Checkout-Demo/iFrameCallback.php"
+
+data-mode="<?php echo $order->mode ?>"
+
+data-store = "Qassat"
+
+data-type = "external"
+
+data-display="en"  > </script>
+
 </body>
+
 </html>
+
