@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>دفع كاشير</title>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <h1>جاري تحويلك لبوابة الدفع...</h1>
+
+    <script>
+      // بيانات الدفع
+      const merchantId = "اكتب هنا رقم التاجر من كاشير";
+      const secret = "اكتب هنا المفتاح السري من كاشير";
+      const amount = 100;
+      const orderId = "order_" + Math.floor(Math.random() * 100000);
+      const currency = "EGP";
+      const mode = "test";
+      const redirectUrl = "yourapp://payment-success";
+
+      const data = {
+        merchantId,
+        amount,
+        orderId,
+        currency,
+        mode,
+        redirectUrl,
+      };
+
+      const message = JSON.stringify(data);
+
+      async function generateSignatureAndRedirect() {
+        const encoder = new TextEncoder();
+        const key = await crypto.subtle.importKey(
+          "raw",
+          encoder.encode(secret),
+          { name: "HMAC", hash: "SHA-256" },
+          false,
+          ["sign"]
+        );
+
+        const signatureBuffer = await crypto.subtle.sign(
+          "HMAC",
+          key,
+          encoder.encode(message)
+        );
+
+        const signature = Array.from(new Uint8Array(signatureBuffer))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+
+        const url = `https://pay.kashier.io/?merchantId=${merchantId}&amount=${amount}&orderId=${orderId}&currency=${currency}&mode=${mode}&redirectUrl=${redirectUrl}&signature=${signature}`;
+
+        // تحويل المستخدم لبوابة الدفع
+        window.location.href = url;
+      }
+
+      generateSignatureAndRedirect();
+    </script>
+  </body>
+</html>
